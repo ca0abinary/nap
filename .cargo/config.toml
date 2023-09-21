@@ -1,0 +1,6 @@
+[build]
+rustflags = [
+    "-Clink-args=-nostartfiles",
+    "-Clink-args=-Wl,-n,-N,--no-dynamic-linker,--build-id=none",
+    "-Crelocation-model=static"
+]
