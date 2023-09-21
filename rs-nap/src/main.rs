@@ -4,11 +4,10 @@
 
 mod support;
 use support::*;
-use core::arch::asm;
 use core::slice::from_raw_parts as mkslice;
 
 #[no_mangle]
-pub unsafe fn nap(args: &[*const u8]) {
+pub unsafe fn nap(args: &[*const u8]) -> ! {
     let mut sleep_time:usize = 10;
 
     if args.len() < 2 {
@@ -41,15 +40,8 @@ pub unsafe fn sleep(seconds: usize, good_input: bool) {
 }
 
 #[no_mangle]
-#[naked]
-pub unsafe extern "C" fn _start() {
-    #[cfg(all(target_arch="x86_64", target_os="linux"))]
-    asm!("mov rdi, rsp", "call get_args", options(noreturn))
-}
-
-#[no_mangle]
-pub unsafe fn get_args(stack_top: *const u8) {
-    let argc = *(stack_top as *const u64);
+unsafe fn get_args(stack_top: *const u8) {
+    let argc = *(stack_top as *const usize);
     let argv = stack_top.add(8) as *const *const u8;
     let args = mkslice(argv, argc as usize);
     nap(args)
