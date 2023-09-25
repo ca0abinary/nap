@@ -14,6 +14,22 @@
 - [x] x86_64 implementation
 - [x] aarch64 implementation
 
+#### Architecture specific implementation notes
+
+For each new architecture:
+
+1. Add a file to the `support` subfolder which implements
+   - The startup code (`_start`) to get arguments from the stack
+   - and the following linux kernel service calls
+     - `sys_exit` to call `exit`
+     - `sys_write` to call `write` to stdout 1
+     - and `sys_sleep`
+2. Add a platform specific entry to `support.rs` in the form of a `cfg_attr`
+3. Add a platform target to `.cargo/config.toml`
+4. Add a toolchain target to `rust-toolchain.toml`
+5. Update this `README.md` with the new platform build and run commands
+6. Update any CI/CD (future) to build the binary for the target platform
+
 ## Run on a native processor
 
 ```sh
