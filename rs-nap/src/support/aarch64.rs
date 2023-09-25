@@ -1,5 +1,4 @@
 use core::arch::asm;
-use core::slice::from_raw_parts as mkslice;
 
 mod interop;
 use interop::timespec;
@@ -16,19 +15,20 @@ unsafe extern "C" fn _start() {
 
 pub unsafe fn sys_exit(exit_code:usize) -> ! {
     asm!("svc 0",
-         in("x8") 93,
+         in("w8") 93,
          in("x0") exit_code,
          options(nostack, noreturn)
     )
 }
 
 pub unsafe fn sys_write(buffer: *const u8, count: usize) {
-    asm!("svc 0", "ret",
-         in("x8") 64,
-         inlateout("x0") 1 => _,
-         in("x1") buffer,
-         in("x2") count,
-         options(nostack, preserves_flags)
+    asm!("mov  x0, #1",
+         "mov  x1, {buffer}",
+         "mov  x2, {count}",
+         "mov  x8, #64",
+         "svc #0",
+         buffer = in(reg) buffer,
+         count = in(reg) count
     )
 }
 
@@ -38,8 +38,8 @@ pub unsafe fn sys_sleep(seconds: usize) {
         tv_nsec: 0
     };
 
-    asm!("svc 0", "ret",
-         inlateout("x0") &sleep_time => _,
+    asm!("svc 0",
+         in("x0") &sleep_time,
          in("x1") 0,
          in("x8") 101,
          options(nostack, preserves_flags)

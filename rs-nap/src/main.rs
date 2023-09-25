@@ -9,34 +9,34 @@ use core::slice::from_raw_parts as mkslice;
 #[no_mangle]
 pub unsafe fn nap(args: &[*const u8]) -> ! {
     let mut sleep_time:usize = 10;
+    let mut good_input:bool = false;
 
-    if args.len() < 2 {
-        sleep(sleep_time, false);
-    } else {
-        let (seconds,_) = from_radix_10(mkslice(args[1], strlen(args[1])));
-        let mut good_input = seconds > 0 && seconds < 1000000000;
-
-        if good_input {
-            sleep_time = seconds;
-        } else {
-            good_input = false;
-        }
-
-        sleep(sleep_time, good_input);
+    if args.len() > 1 {
+        (sleep_time, good_input) = get_sleep_time(args[1]);
     }
+
+    sleep(sleep_time, good_input);
 
     print_str(b"Done!\n");
-    sys_exit(0);
+    sys_exit(0)
 }
 
-pub unsafe fn sleep(seconds: usize, good_input: bool) {
+pub unsafe fn sleep(mut sleep_time: usize, good_input: bool) {
     if good_input == false {
+        sleep_time = 10;
         print_str(b"Bad input. ");
     }
+
     print_str(b"Sleeping for ");
-    print_num(seconds);
+    print_num(sleep_time);
     print_str(b" seconds...\n");
-    sys_sleep(seconds)
+
+    sys_sleep(sleep_time);
+}
+
+unsafe fn get_sleep_time(arg: *const u8) -> (usize, bool) {
+    let (seconds,_) = from_radix_10(mkslice(arg, strlen(arg)));
+    (seconds, seconds > 0 && seconds < 1000000000)
 }
 
 #[no_mangle]
