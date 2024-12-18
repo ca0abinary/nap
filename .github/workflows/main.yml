@@ -12,30 +12,18 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y make nasm binutils binutils-aarch64-linux-gnu
+          sudo apt-get install -y curl make nasm qemu-user-static \
+               gcc-x86-64-linux-gnu binutils-x86-64-linux-gnu \
+               gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-      - name: Build via Makefile
-        run: make ci_build
+      - name: Build and Test
+        run: |
+          . "$HOME/.cargo/env"
+          make -s ci_tests
 
       - name: Public artifact
         uses: actions/upload-artifact@v1
         with:
           name: Build Artifact
           path: out/
-
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y make nasm binutils binutils-aarch64-linux-gnu
-          sudo wget https://github.com/multiarch/qemu-user-static/releases/download/v7.1.0-2/qemu-aarch64-static -O /usr/sbin/qemu-aarch64-static
-          sudo chmod +x /usr/sbin/qemu-aarch64-static
-
-      - name: Run Tests
-        run: make ci_tests

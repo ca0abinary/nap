@@ -9,21 +9,12 @@ ci_build:
 	x86_64-linux-gnu-ld -m elf_x86_64 -z noseparate-code -z noexecstack --strip-all -o out/nap nap.o && rm nap.o
 	aarch64-linux-gnu-as nap-aarch64.s -o nap-aarch64.o
 	aarch64-linux-gnu-ld -z noseparate-code -z noexecstack --strip-all -o out/nap-aarch64 nap-aarch64.o && rm nap-aarch64.o
+	cargo build --release --target-dir target --target x86_64-unknown-linux-gnu && cp target/x86_64-unknown-linux-gnu/release/rs-nap out/rs-nap-x86_64
+	cargo build --release --target-dir target --target aarch64-unknown-linux-gnu && cp target/aarch64-unknown-linux-gnu/release/rs-nap out/rs-nap-aarch64
 	ls -la out/
 
 ci_tests: ci_build
-	if [ $$(arch) = "x86_64" ]; then \
-		echo "[x86_64] Testing 1s nap"; \
-		timeout 3s out/nap 1 2>&1 > /dev/null; \
-		echo "[x86_64] Testing 10s default/bad input nap"; \
-		timeout 12s out/nap bad_arg ; if [ $$? = "1" ]; then true; else false; fi; \
-	else \
-		echo "x86_64 testing not available on aarch64 platform"; \
-	fi
-	echo "[aarch64] Testing 1s nap"
-	timeout 3s qemu-aarch64-static out/nap-aarch64 1 2>&1 > /dev/null
-	echo "[aarch64] Testing 10s default/bad input nap"
-	timeout 12s qemu-aarch64-static out/nap-aarch64 bad_arg ; if [ $$? = "1" ]; then true; else false; fi
+	@bash run-tests.sh
 
 tests: install
 	if [ $$(arch) = "x86_64" ]; then \
