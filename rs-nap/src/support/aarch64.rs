@@ -1,4 +1,4 @@
-use core::arch::asm;
+use core::arch::{asm,naked_asm};
 
 mod interop;
 use interop::timespec;
@@ -7,10 +7,11 @@ use interop::timespec;
 #[naked]
 unsafe extern "C" fn _start() {
     // Move the stack pointer before it gets clobbered
-    asm!("mov fp, sp",
-         "mov x0, fp",
-         "bl get_args",
-         options(noreturn))
+    naked_asm!(
+        "mov fp, sp",
+        "mov x0, fp",
+        "bl get_args"
+    )
 }
 
 pub unsafe fn sys_exit(exit_code:usize) -> ! {

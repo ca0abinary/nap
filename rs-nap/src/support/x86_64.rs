@@ -1,5 +1,4 @@
-use core::arch::asm;
-use core::slice::from_raw_parts as mkslice;
+use core::arch::{asm,naked_asm};
 
 mod interop;
 use interop::timespec;
@@ -8,9 +7,10 @@ use interop::timespec;
 #[naked]
 unsafe extern "C" fn _start() {
     // Move the stack pointer before it gets clobbered
-    asm!("mov rdi, rsp",
-         "call get_args",
-         options(noreturn))
+    naked_asm!(
+        "mov rdi, rsp",
+        "call get_args"
+    )
 }
 
 pub unsafe fn sys_exit(exit_code:usize) -> ! {
