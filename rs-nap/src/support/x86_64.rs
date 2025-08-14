@@ -4,7 +4,7 @@ mod interop;
 use interop::timespec;
 
 #[no_mangle]
-#[naked]
+#[unsafe(naked)]
 unsafe extern "C" fn _start() {
     // Move the stack pointer before it gets clobbered
     naked_asm!(
