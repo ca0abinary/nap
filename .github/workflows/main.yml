@@ -16,9 +16,7 @@ jobs:
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
-          runCmd: |
-            find $(pwd) -type f ! -path "*/.git/*"
-            make -s ci_setup
+          runCmd: make -s ci_tests
 
       - name: Publish artifact
         uses: actions/upload-artifact@v4
